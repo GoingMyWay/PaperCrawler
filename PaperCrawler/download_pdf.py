@@ -50,7 +50,7 @@ def merge_pdfs(file_path, sup_url):
     file_path_bak = _file_path + '_bak' + '.pdf'
     sup_file_path = _file_path + '_sup.pdf'
     if len(sup_url) != 0:
-        merger = PdfFileMerger()
+        merger = PdfFileMerger(strict=False)
         merger.append(file_path_bak)
         merger.append(sup_file_path)
         with open(file_path, 'wb') as fout:
