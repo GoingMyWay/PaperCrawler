@@ -19,6 +19,10 @@ def download_file(download_url, file_name):
 
 
 def pdf_downloader(file_path, url, sup_url):
+
+    url = url if not url.startswith('ttp') else 'h' + url
+    sup_url = sup_url if not sup_url.startswith('ttp') else 'h' + sup_url
+
     _file_path = file_path.replace(':', '-')
     _file_path = _file_path.replace('?', '-')
     _file_path = _file_path.replace('!', '-')
@@ -33,7 +37,6 @@ def pdf_downloader(file_path, url, sup_url):
     time.sleep(0.5)
     if len(sup_url) != 0:
         sup_file_path = _file_path + '_sup.pdf'
-        
         try:
             urlretrieve(sup_url, sup_file_path)
         except Exception as e:
@@ -41,6 +44,8 @@ def pdf_downloader(file_path, url, sup_url):
 
 
 def merge_pdfs(file_path, sup_url):
+    sup_url = sup_url if not sup_url.startswith('ttp') else 'h' + sup_url
+
     _file_path = file_path.replace(':', '-')
     _file_path = _file_path.replace('?', '-')
     _file_path = _file_path.replace('!', '-')
@@ -96,8 +101,6 @@ if __name__ == '__main__':
         title = item['title']
         pdf_url = item['pdf']
         sup_url = item['sup']
-        pdf_url if not pdf_url.startswith('ttp') else 'h' + pdf_url
-        sup_url if not sup_url.startswith('ttp') else 'h' + sup_url
         if check(key_words, title) and parser.RL:
             pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), pdf_url, sup_url)
         else:
@@ -108,8 +111,6 @@ if __name__ == '__main__':
         title = item['title']
         pdf_url = item['pdf']
         sup_url = item['sup']
-        pdf_url if not pdf_url.startswith('ttp') else 'h' + pdf_url
-        sup_url if not sup_url.startswith('ttp') else 'h' + sup_url
         if check(key_words, title) and parser.RL:
             merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), sup_url)
         else:
