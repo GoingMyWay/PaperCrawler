@@ -3,6 +3,7 @@ import json
 import time
 import urllib
 import argparse
+import traceback
 
 import tqdm
 
@@ -26,21 +27,29 @@ def pdf_downloader(file_path, url, sup_url):
     _file_path = file_path.replace(':', '-')
     _file_path = _file_path.replace('?', '-')
     _file_path = _file_path.replace('!', '-')
+    _file_path = _file_path.replace("$", "")
+    _file_path = _file_path.replace("\'", "")
     file_path = _file_path + '.pdf'
     file_path_bak = _file_path + '_bak.pdf'
 
     try:
-        urlretrieve(url, file_path_bak)
+        if not os.path.exists(file_path_bak):
+            urlretrieve(url, file_path_bak)
+            time.sleep(0.3)
     except Exception as e:
-        print(url, file_path_bak)
-
+        print('ERROR', url, file_path_bak)
+        traceback.print_exc()
+    
     time.sleep(0.5)
     if len(sup_url) != 0:
         sup_file_path = _file_path + '_sup.pdf'
         try:
-            urlretrieve(sup_url, sup_file_path)
+            if not os.path.exists(sup_file_path):
+                urlretrieve(sup_url, sup_file_path)
+                time.sleep(0.3)
         except Exception as e:
             print(sup_url, sup_file_path)
+            traceback.print_exc()
 
 
 def merge_pdfs(file_path, sup_url):
@@ -62,6 +71,7 @@ def merge_pdfs(file_path, sup_url):
             merger.write(fout)
         
         merger.close()
+        time.sleep(0.5)
         os.remove(file_path_bak)
         os.remove(sup_file_path)
     else:
@@ -90,19 +100,20 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.join(parser.data_dir, 'RL')):
         os.makedirs(os.path.join(parser.data_dir, 'RL'))
 
-    with open("..\\items.json") as json_file:  
+    with open(os.path.join(os.path.abspath('..'), 'items.json')) as json_file:  
         data = json.load(json_file)
 
-    key_words = [
+    rl_key_words = [
             'reinforcement learning', 'policy', 'multi-agent', 'multiagent', 'off-policy', 'on-policy', 'mdp', 'exploration', 'bellman',
-             'dqn', 'optimization', 'meta-learning', 'meta-reinforcement' 'multi-task', 'Representation', 'model-based', 'model-free']
+             'dqn', 'meta-learning', 'meta-reinforcement' 'multi-task', 'representation', 'model-based', 'model-free']
 
     for item in tqdm.tqdm(data):
         title = item['title']
         pdf_url = item['pdf']
         sup_url = item['sup']
-        if check(key_words, title) and parser.RL:
-            pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), pdf_url, sup_url)
+        if parser.RL:
+            if check(rl_key_words, title):
+                pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), pdf_url, sup_url)
         else:
             pdf_downloader(os.path.join(parser.data_dir, '19-'+title), pdf_url, sup_url)
 
@@ -111,7 +122,8 @@ if __name__ == '__main__':
         title = item['title']
         pdf_url = item['pdf']
         sup_url = item['sup']
-        if check(key_words, title) and parser.RL:
-            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), sup_url)
+        if parser.RL:
+            if check(rl_key_words, title):
+                merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), sup_url)
         else:
             merge_pdfs(os.path.join(parser.data_dir, '19-'+title), sup_url)
