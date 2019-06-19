@@ -104,23 +104,29 @@ if __name__ == '__main__':
             'reinforcement learning', 'policy', 'multi-agent', 'multiagent', 'off-policy', 'on-policy', 'mdp', 'exploration', 'bellman',
              'dqn', 'meta-learning', 'meta-reinforcement' 'multi-task', 'representation', 'model-based', 'model-free']
 
-    for item in tqdm.tqdm(data):
-        title = item['title']
-        pdf_url = item['pdf']
-        sup_url = item['sup']
-        if parser.RL:
+    items = []
+    if len(rl_key_words) != 0 and parser.RL:
+        for item in data:
+            title = item['title']
+            pdf_url = item['pdf']
+            sup_url = item['sup']
             if check(rl_key_words, title):
-                pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), pdf_url, sup_url)
-        else:
+                items.append((title, pdf_url, sup_url))
+    
+        for title, pdf_url, sup_url in tqdm.tqdm(items):
+            pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), pdf_url, sup_url)
+    else:
+        for item in tqdm.tqdm(data):
+            title, pdf_url, sup_url = item['title'], item['pdf'], item['sup']
             pdf_downloader(os.path.join(parser.data_dir, '19-'+title), pdf_url, sup_url)
 
     # merge files
-    for item in tqdm.tqdm(data):
-        title = item['title']
-        pdf_url = item['pdf']
-        sup_url = item['sup']
-        if parser.RL:
-            if check(rl_key_words, title):
-                merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), sup_url)
-        else:
+    if len(rl_key_words) != 0 and parser.RL:
+        for title, pdf_url, sup_url in tqdm.tqdm(items):
+            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), sup_url)
+    else:
+        for item in tqdm.tqdm(data):
+            title = item['title']
+            pdf_url = item['pdf']
+            sup_url = item['sup']
             merge_pdfs(os.path.join(parser.data_dir, '19-'+title), sup_url)
