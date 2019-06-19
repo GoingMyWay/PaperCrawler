@@ -8,7 +8,7 @@ import traceback
 import tqdm
 
 from scrapy import Spider
-from PyPDF3 import PdfFileMerger
+from pdfrw import PdfReader, PdfWriter
 from urllib.request import urlretrieve
 
 
@@ -64,14 +64,11 @@ def merge_pdfs(file_path, sup_url):
     file_path_bak = _file_path + '_bak.pdf'
     if len(sup_url) != 0:
         sup_file_path = _file_path + '_sup.pdf'
-        merger = PdfFileMerger(strict=False)
-        merger.append(file_path_bak)
-        merger.append(sup_file_path)
-        with open(file_path, 'wb') as fout:
-            merger.write(fout)
+        writer = PdfWriter()
+        for inpfn in [file_path_bak, sup_file_path]:
+            writer.addpages(PdfReader(inpfn).pages)
         
-        merger.close()
-        time.sleep(0.5)
+        writer.write(file_path)
         os.remove(file_path_bak)
         os.remove(sup_file_path)
     else:
