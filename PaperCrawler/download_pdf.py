@@ -44,7 +44,7 @@ def pdf_downloader(file_path, url, sup_url):
     file_path_bak = _file_path + '_bak.pdf'
 
     try:
-        if not os.path.exists(file_path_bak):
+        if not os.path.exists(file_path_bak) and not os.path.exists(file_path):
             urlretrieve_v2(url, file_path_bak)
             time.sleep(0.3)
     except Exception as e:
@@ -55,7 +55,7 @@ def pdf_downloader(file_path, url, sup_url):
     if len(sup_url) != 0:
         sup_file_path = _file_path + '_sup.pdf'
         try:
-            if not os.path.exists(sup_file_path):
+            if not os.path.exists(sup_file_path) and not os.path.exists(file_path):
                 urlretrieve_v2(sup_url, sup_file_path)
                 time.sleep(0.3)
         except Exception as e:
