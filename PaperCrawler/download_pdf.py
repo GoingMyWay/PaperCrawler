@@ -12,6 +12,17 @@ from pdfrw import PdfReader, PdfWriter
 from urllib.request import urlretrieve
 
 
+def urlretrieve_v2(url, filename):
+    """
+    For stable download.
+    """
+    try:
+        urlretrieve(url,filename)
+    except urllib.error.ContentTooShortError:
+        print('[INFO] Network is not good, re-download it')
+        urlretrieve_v2(url, filename)
+
+
 def download_file(download_url, file_name):
     response = urllib.request.urlopen(download_url)
     file = open(file_name, 'wb')
@@ -34,7 +45,7 @@ def pdf_downloader(file_path, url, sup_url):
 
     try:
         if not os.path.exists(file_path_bak):
-            urlretrieve(url, file_path_bak)
+            urlretrieve_v2(url, file_path_bak)
             time.sleep(0.3)
     except Exception as e:
         print('ERROR', url, file_path_bak)
@@ -45,7 +56,7 @@ def pdf_downloader(file_path, url, sup_url):
         sup_file_path = _file_path + '_sup.pdf'
         try:
             if not os.path.exists(sup_file_path):
-                urlretrieve(sup_url, sup_file_path)
+                urlretrieve_v2(sup_url, sup_file_path)
                 time.sleep(0.3)
         except Exception as e:
             print(sup_url, sup_file_path)
@@ -54,7 +65,6 @@ def pdf_downloader(file_path, url, sup_url):
 
 def merge_pdfs(file_path, sup_url):
     sup_url = sup_url if not sup_url.startswith('ttp') else 'h' + sup_url
-
     _file_path = file_path.replace(':', '-')
     _file_path = _file_path.replace('?', '-')
     _file_path = _file_path.replace('!', '-')
@@ -62,8 +72,10 @@ def merge_pdfs(file_path, sup_url):
     _file_path = _file_path.replace("\'", '')
     file_path = _file_path + '.pdf'
     file_path_bak = _file_path + '_bak.pdf'
-    if len(sup_url) != 0:
+    if len(sup_url) != 0 and not os.path.exists(file_path):
         sup_file_path = _file_path + '_sup.pdf'
+        print(file_path_bak, sup_file_path)
+
         writer = PdfWriter()
         for inpfn in [file_path_bak, sup_file_path]:
             writer.addpages(PdfReader(inpfn).pages)
@@ -72,7 +84,8 @@ def merge_pdfs(file_path, sup_url):
         os.remove(file_path_bak)
         os.remove(sup_file_path)
     else:
-        os.rename(file_path_bak, file_path)
+        if os.path.exists(file_path_bak):
+            os.rename(file_path_bak, file_path)
 
 
 def check(keywords, file_name):
