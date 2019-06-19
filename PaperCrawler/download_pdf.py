@@ -40,6 +40,7 @@ def pdf_downloader(file_path, url, sup_url):
     _file_path = _file_path.replace('!', '-')
     _file_path = _file_path.replace("$", "")
     _file_path = _file_path.replace("\'", "")
+    _file_path = _file_path.replace("/", "")
     file_path = _file_path + '.pdf'
     file_path_bak = _file_path + '_bak.pdf'
 
@@ -51,7 +52,6 @@ def pdf_downloader(file_path, url, sup_url):
         print('ERROR', url, file_path_bak)
         traceback.print_exc()
     
-    time.sleep(0.5)
     if len(sup_url) != 0:
         sup_file_path = _file_path + '_sup.pdf'
         try:
@@ -70,6 +70,7 @@ def merge_pdfs(file_path, sup_url):
     _file_path = _file_path.replace('!', '-')
     _file_path = _file_path.replace('$', '')
     _file_path = _file_path.replace("\'", '')
+    _file_path = _file_path.replace("/", "")
     file_path = _file_path + '.pdf'
     file_path_bak = _file_path + '_bak.pdf'
     if len(sup_url) != 0 and not os.path.exists(file_path):
