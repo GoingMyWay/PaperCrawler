@@ -116,7 +116,7 @@ if __name__ == '__main__':
 
     rl_key_words = [
             'reinforcement learning', 'policy', 'multi-agent', 'multiagent', 'off-policy', 'on-policy', 'mdp', 'exploration', 'bellman',
-             'dqn', 'meta-learning', 'meta-reinforcement' 'multi-task', 'representation', 'model-based', 'model-free']
+             'dqn', 'meta-learning', 'meta-reinforcement' 'multi-task', 'multi-goal', 'model-based', 'model-free']
 
     items = []
     if len(rl_key_words) != 0 and parser.RL:
