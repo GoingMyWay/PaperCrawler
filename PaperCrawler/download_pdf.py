@@ -132,10 +132,10 @@ if __name__ == '__main__':
     # merge files
     if len(rl_key_words) != 0 and parser.RL:
         for title, pdf_url, sup_url in tqdm.tqdm(items):
-            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), sup_url)
+            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+preprocess_title(title)), sup_url)
     else:
         for item in tqdm.tqdm(data):
             title = item['title']
             pdf_url = item['pdf']
             sup_url = item['sup']
-            merge_pdfs(os.path.join(parser.data_dir, '19-'+title), sup_url)
+            merge_pdfs(os.path.join(parser.data_dir, '19-'+preprocess_title(title)), sup_url)
