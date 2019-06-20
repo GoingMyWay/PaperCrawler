@@ -12,6 +12,16 @@ from pdfrw import PdfReader, PdfWriter
 from urllib.request import urlretrieve
 
 
+def preprocess_title(title):
+    title = title.replace(':', '-')
+    title = title.replace('?', '-')
+    title = title.replace('!', '-')
+    title = title.replace("$", "")  # latex
+    title = title.replace("\'", "")
+    title = title.replace("/", "")
+    return title
+
+
 def urlretrieve_v2(url, filename):
     """
     For stable download.
@@ -31,16 +41,7 @@ def download_file(download_url, file_name):
 
 
 def pdf_downloader(file_path, url, sup_url):
-
-    url = url if not url.startswith('ttp') else 'h' + url
-    sup_url = sup_url if not sup_url.startswith('ttp') else 'h' + sup_url
-
-    _file_path = file_path.replace(':', '-')
-    _file_path = _file_path.replace('?', '-')
-    _file_path = _file_path.replace('!', '-')
-    _file_path = _file_path.replace("$", "")
-    _file_path = _file_path.replace("\'", "")
-    _file_path = _file_path.replace("/", "")
+    _file_path = file_path
     file_path = _file_path + '.pdf'
     file_path_bak = _file_path + '_bak.pdf'
 
@@ -64,13 +65,7 @@ def pdf_downloader(file_path, url, sup_url):
 
 
 def merge_pdfs(file_path, sup_url):
-    sup_url = sup_url if not sup_url.startswith('ttp') else 'h' + sup_url
-    _file_path = file_path.replace(':', '-')
-    _file_path = _file_path.replace('?', '-')
-    _file_path = _file_path.replace('!', '-')
-    _file_path = _file_path.replace('$', '')
-    _file_path = _file_path.replace("\'", '')
-    _file_path = _file_path.replace("/", "")
+    _file_path = file_path
     file_path = _file_path + '.pdf'
     file_path_bak = _file_path + '_bak.pdf'
     if len(sup_url) != 0 and not os.path.exists(file_path):
@@ -128,11 +123,11 @@ if __name__ == '__main__':
                 items.append((title, pdf_url, sup_url))
     
         for title, pdf_url, sup_url in tqdm.tqdm(items):
-            pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+title), pdf_url, sup_url)
+            pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+preprocess_title(title)), pdf_url, sup_url)
     else:
         for item in tqdm.tqdm(data):
             title, pdf_url, sup_url = item['title'], item['pdf'], item['sup']
-            pdf_downloader(os.path.join(parser.data_dir, '19-'+title), pdf_url, sup_url)
+            pdf_downloader(os.path.join(parser.data_dir, '19-'+preprocess_title(title)), pdf_url, sup_url)
 
     # merge files
     if len(rl_key_words) != 0 and parser.RL:
