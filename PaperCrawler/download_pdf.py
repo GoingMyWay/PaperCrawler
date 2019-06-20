@@ -70,7 +70,6 @@ def merge_pdfs(file_path, sup_url):
     file_path_bak = _file_path + '_bak.pdf'
     if len(sup_url) != 0 and not os.path.exists(file_path):
         sup_file_path = _file_path + '_sup.pdf'
-        print(file_path_bak, sup_file_path)
 
         writer = PdfWriter()
         for inpfn in [file_path_bak, sup_file_path]:
