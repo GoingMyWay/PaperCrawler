@@ -2,6 +2,7 @@ import os
 import json
 import time
 import urllib
+import requests
 import argparse
 import traceback
 
@@ -12,6 +13,47 @@ from pdfrw import PdfReader, PdfWriter
 from urllib.request import urlretrieve
 
 
+# For downloading files from Google Drive
+def download_file_from_google_drive(id, save_path):
+    """
+    Downloading files from Google Drive is not such straightforward, for example:
+        https://drive.google.com/file/d/1I05c4-d9OsNwGZnLx85fR8dnX-yVoTWe/view
+    You cannot download it but read it, this links contains id=1I05c4-d9OsNwGZnLx85fR8dnX-yVoTWe,
+    you can use this id to download it.
+
+    >>> download_file_from_google_drive(id='1I05c4-d9OsNwGZnLx85fR8dnX-yVoTWe', save_path='demo.pdf')
+    """
+
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+
+    response = session.get(URL, params = { 'id' : id }, stream = True)
+    token = _get_confirm_token(response)
+
+    if token:
+        params = { 'id' : id, 'confirm' : token }
+        response = session.get(URL, params = params, stream = True)
+
+    _save_response_content(response, save_path)    
+
+def _get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+
+    return None
+
+def _save_response_content(response, save_path):
+    CHUNK_SIZE = 32768
+
+    with open(save_path, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk: # filter out keep-alive new chunks
+                f.write(chunk)
+
+
+# For normal download
 def preprocess_title(title):
     title = title.replace(':', '-')
     title = title.replace('?', '-')
@@ -64,6 +106,7 @@ def pdf_downloader(file_path, url, sup_url):
             traceback.print_exc()
 
 
+# For merging PDF files
 def merge_pdfs(file_path, sup_url):
     _file_path = file_path
     file_path = _file_path + '.pdf'
