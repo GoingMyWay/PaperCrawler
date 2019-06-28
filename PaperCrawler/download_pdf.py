@@ -181,7 +181,7 @@ if __name__ == '__main__':
         _step = int(len(items)/thread_num)
         _offset = len(items) % thread_num
         for i in range(thread_num):
-            _j = _off if i+1 == thread_num else 0
+            _j = _offset if i+1 == thread_num else 0
             threads.append(threading.Thread(target=thread_worker, args=(items[i*_step:(i+1)*_step+_j], )))
         
         for thread in threads:
