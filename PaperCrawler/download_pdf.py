@@ -179,8 +179,10 @@ if __name__ == '__main__':
                 items.append((title, pdf_url, sup_url))
         thread_num = 4
         _step = int(len(items)/thread_num)
+        _offset = len(items) % thread_num
         for i in range(thread_num):
-            threads.append(threading.Thread(target=thread_worker, args=(items[i*_step:(i+1)*_step], )))
+            _j = _off if i+1 == thread_num else 0
+            threads.append(threading.Thread(target=thread_worker, args=(items[i*_step:(i+1)*_step+_j], )))
         
         for thread in threads:
             thread.start()
