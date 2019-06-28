@@ -5,6 +5,7 @@ import urllib
 import requests
 import argparse
 import traceback
+import threading
 
 import tqdm
 
@@ -116,8 +117,13 @@ def merge_pdfs(file_path, sup_url):
 
         writer = PdfWriter()
         for inpfn in [file_path_bak, sup_file_path]:
-            writer.addpages(PdfReader(inpfn).pages)
-        
+            try:
+                writer.addpages(PdfReader(inpfn).pages)
+            except Exception:
+                print(inpfn)
+                traceback.print_exc()
+                exit(-1)
+
         writer.write(file_path)
         os.remove(file_path_bak)
         os.remove(sup_file_path)
@@ -137,10 +143,17 @@ def check(keywords, file_name):
     return False
 
 
+def thread_worker(items):
+    for title, pdf_url, sup_url in tqdm.tqdm(items):
+        pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), YEAR+'-'+preprocess_title(title)), pdf_url, sup_url)
+
+
 if __name__ == '__main__':
+    YEAR = '18'
+
     parser = argparse.ArgumentParser(description='Crawl paper')
     parser.add_argument('--RL', action="store_true", default=False, help='download RL papers')
-    parser.add_argument("--data-dir", type=str, default="icml2019", help="data dir")
+    parser.add_argument("--data-dir", type=str, default="icml20%s" %  YEAR, help="data dir")
     parser = parser.parse_args()
 
     if not os.path.exists(parser.data_dir):
@@ -148,13 +161,14 @@ if __name__ == '__main__':
     if not os.path.exists(os.path.join(parser.data_dir, 'RL')):
         os.makedirs(os.path.join(parser.data_dir, 'RL'))
 
-    with open(os.path.join(os.path.abspath('..'), 'items.json')) as json_file:  
+    with open(os.path.join(os.path.abspath('..'), 'items_icml%s.json' % YEAR)) as json_file:  
         data = json.load(json_file)
 
     rl_key_words = [
             'reinforcement learning', 'policy', 'multi-agent', 'multiagent', 'off-policy', 'on-policy', 'mdp', 'exploration', 'bellman',
              'dqn', 'meta-learning', 'meta-reinforcement' 'multi-task', 'multi-goal', 'model-based', 'model-free']
 
+    threads = []  # 4 threads
     items = []
     if len(rl_key_words) != 0 and parser.RL:
         for item in data:
@@ -163,21 +177,28 @@ if __name__ == '__main__':
             sup_url = item['sup']
             if check(rl_key_words, title):
                 items.append((title, pdf_url, sup_url))
-    
-        for title, pdf_url, sup_url in tqdm.tqdm(items):
-            pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+preprocess_title(title)), pdf_url, sup_url)
+        thread_num = 4
+        _step = int(len(items)/thread_num)
+        for i in range(thread_num):
+            threads.append(threading.Thread(target=thread_worker, args=(items[i*_step:(i+1)*_step], )))
+        
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+        print("Download finished, Now merge them!", len(items))
     else:
         for item in tqdm.tqdm(data):
             title, pdf_url, sup_url = item['title'], item['pdf'], item['sup']
-            pdf_downloader(os.path.join(parser.data_dir, '19-'+preprocess_title(title)), pdf_url, sup_url)
+            pdf_downloader(os.path.join(parser.data_dir, YEAR+'-'+preprocess_title(title)), pdf_url, sup_url)
 
     # merge files
     if len(rl_key_words) != 0 and parser.RL:
         for title, pdf_url, sup_url in tqdm.tqdm(items):
-            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), '19-'+preprocess_title(title)), sup_url)
+            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), YEAR+'-'+preprocess_title(title)), sup_url)
     else:
         for item in tqdm.tqdm(data):
             title = item['title']
             pdf_url = item['pdf']
             sup_url = item['sup']
-            merge_pdfs(os.path.join(parser.data_dir, '19-'+preprocess_title(title)), sup_url)
+            merge_pdfs(os.path.join(parser.data_dir, YEAR+'-'+preprocess_title(title)), sup_url)
