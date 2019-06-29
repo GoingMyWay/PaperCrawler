@@ -145,23 +145,23 @@ def check(keywords, file_name):
 
 def thread_worker(items):
     for title, pdf_url, sup_url in tqdm.tqdm(items):
-        pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), YEAR+'-'+preprocess_title(title)), pdf_url, sup_url)
+        pdf_downloader(os.path.join(os.path.join(parser.data_dir, 'RL'), parser.year+'-'+preprocess_title(title)), pdf_url, sup_url)
 
 
 if __name__ == '__main__':
-    YEAR = '18'
-
     parser = argparse.ArgumentParser(description='Crawl paper')
     parser.add_argument('--RL', action="store_true", default=False, help='download RL papers')
-    parser.add_argument("--data-dir", type=str, default="icml20%s" %  YEAR, help="data dir")
+    parser.add_argument('--year', type=str, default='19')
+    parser.add_argument("--data-dir", type=str, default="icml20%s", help="data dir")
     parser = parser.parse_args()
+    parser.data_dir = parser.data_dir % parser.year
 
     if not os.path.exists(parser.data_dir):
         os.makedirs(parser.data_dir)
     if not os.path.exists(os.path.join(parser.data_dir, 'RL')):
         os.makedirs(os.path.join(parser.data_dir, 'RL'))
 
-    with open(os.path.join(os.path.abspath('..'), 'items_icml%s.json' % YEAR)) as json_file:  
+    with open(os.path.join(os.path.abspath('..'), 'items_icml%s.json' % parser.year)) as json_file:  
         data = json.load(json_file)
 
     rl_key_words = [
@@ -192,15 +192,15 @@ if __name__ == '__main__':
     else:
         for item in tqdm.tqdm(data):
             title, pdf_url, sup_url = item['title'], item['pdf'], item['sup']
-            pdf_downloader(os.path.join(parser.data_dir, YEAR+'-'+preprocess_title(title)), pdf_url, sup_url)
+            pdf_downloader(os.path.join(parser.data_dir, parser.year+'-'+preprocess_title(title)), pdf_url, sup_url)
 
     # merge files
     if len(rl_key_words) != 0 and parser.RL:
         for title, pdf_url, sup_url in tqdm.tqdm(items):
-            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), YEAR+'-'+preprocess_title(title)), sup_url)
+            merge_pdfs(os.path.join(os.path.join(parser.data_dir, 'RL'), parser.year+'-'+preprocess_title(title)), sup_url)
     else:
         for item in tqdm.tqdm(data):
             title = item['title']
             pdf_url = item['pdf']
             sup_url = item['sup']
-            merge_pdfs(os.path.join(parser.data_dir, YEAR+'-'+preprocess_title(title)), sup_url)
+            merge_pdfs(os.path.join(parser.data_dir, parser.year+'-'+preprocess_title(title)), sup_url)
