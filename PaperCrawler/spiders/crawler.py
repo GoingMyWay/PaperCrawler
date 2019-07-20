@@ -22,3 +22,17 @@ class PaperCrawler(Spider):
             _sup_data = _sup_data if not _sup_data.startswith('ttp') else 'h' + _sup_data
             item['sup'] = _sup_data
             yield item
+
+class ICLRCrawler(Spider):
+    name = "ICLRCrawler"
+    allowed_domains = ["iclr.cc"]
+    start_urls = ["https://iclr.cc/Conferences/2019/Schedule?type=Poster", ]
+
+    def parse(self, response):
+
+        for poster in response.xpath('//div[starts-with(@id, "maincard_")]'):
+            item = PapercrawlerItem()
+            item["title"] = poster.xpath('.//div[@class="maincardBody"]/text()[1]').get()
+            item["pdf"] = poster.xpath('.//a[@title="PDF"]/@href').get()
+            item['sup'] = ''
+            yield item
