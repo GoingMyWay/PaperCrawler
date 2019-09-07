@@ -152,32 +152,45 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Crawl paper')
     parser.add_argument('--RL', action="store_true", default=False, help='download RL papers')
     parser.add_argument('--year', type=str, default='19')
-    parser.add_argument("--data-dir", type=str, default="icml20%s", help="data dir")
+    parser.add_argument('--con', type=str, default='iclr')
+    parser.add_argument("--data-dir", type=str, default="%s%s", help="data dir")
+    parser.add_argument('--thread-num', type=int, default=16)
     parser = parser.parse_args()
-    parser.data_dir = parser.data_dir % parser.year
+    parser.data_dir = parser.data_dir % (parser.con, parser.year)
 
     if not os.path.exists(parser.data_dir):
         os.makedirs(parser.data_dir)
     if not os.path.exists(os.path.join(parser.data_dir, 'RL')):
         os.makedirs(os.path.join(parser.data_dir, 'RL'))
 
-    with open(os.path.join(os.path.abspath('..'), 'items_icml%s.json' % parser.year)) as json_file:  
+    with open(os.path.join(os.path.abspath('..'), '%s%s_items.json' % (parser.con, parser.year))) as json_file:  
         data = json.load(json_file)
 
     rl_key_words = [
-            'reinforcement learning', 'policy', 'multi-agent', 'multiagent', 'off-policy', 'on-policy', 'mdp', 'exploration', 'bellman',
-             'dqn', 'meta-learning', 'meta-reinforcement' 'multi-task', 'multi-goal', 'model-based', 'model-free']
+            'reinforcement learning', 'policy', 'policies', 'multi-agent', 'multiagent', 'reinforcement',
+            'on-policy', 'mdp', 'marl', 'simulate', 'explore-exploit', 'exploration', 'off-policy', 'rl',
+            'bellman', 'option', 'state', 'reward', 'dqn', 'meta-learning', 'meta-reinforcement', 
+            'successor', 'markov', 'multi-task', 'multi-goal', 'model-based', 'model-free', 
+            'td-learning', 'temporal difference', 'bandit', 'control', 'temporal-difference', 
+            'actor-critic', 'actor critic', 'hierachical', 'hierachical reinforcement learning', 
+            'bayes', 'trajectory', 'trajectories', 'imitation learning', 'control',  'planning',
+            'markov decision processes', 'credit assignment', 'markov chain monte carlo']
 
-    threads = []  # 4 threads
+    thread_num = parser.thread_num
+    threads = []
     items = []
     if len(rl_key_words) != 0 and parser.RL:
         for item in data:
             title = item['title']
             pdf_url = item['pdf']
             sup_url = item['sup']
+            if pdf_url is None:
+                continue
+            if parser.con == 'iclr':
+                pdf_url = pdf_url.replace('forum', 'pdf')
             if check(rl_key_words, title):
                 items.append((title, pdf_url, sup_url))
-        thread_num = 4
+        
         _step = int(len(items)/thread_num)
         _offset = len(items) % thread_num
         for i in range(thread_num):
@@ -192,6 +205,10 @@ if __name__ == '__main__':
     else:
         for item in tqdm.tqdm(data):
             title, pdf_url, sup_url = item['title'], item['pdf'], item['sup']
+            if pdf_url is None:
+                continue
+            if parser.con == 'iclr':
+                pdf_url = pdf_url.replace('forum', 'pdf')
             pdf_downloader(os.path.join(parser.data_dir, parser.year+'-'+preprocess_title(title)), pdf_url, sup_url)
 
     # merge files
@@ -202,5 +219,7 @@ if __name__ == '__main__':
         for item in tqdm.tqdm(data):
             title = item['title']
             pdf_url = item['pdf']
-            sup_url = item['sup']
+            sup_url = item['sup']            
+            if pdf_url is None:
+                continue
             merge_pdfs(os.path.join(parser.data_dir, parser.year+'-'+preprocess_title(title)), sup_url)
