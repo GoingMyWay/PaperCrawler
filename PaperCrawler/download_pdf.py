@@ -170,11 +170,11 @@ if __name__ == '__main__':
             'reinforcement learning', 'policy', 'policies', 'multi-agent', 'multiagent', 'reinforcement',
             'on-policy', 'mdp', 'marl', 'simulate', 'explore-exploit', 'exploration', 'off-policy', 'rl',
             'bellman', 'option', 'state', 'reward', 'dqn', 'meta-learning', 'meta-reinforcement', 
-            'successor', 'markov', 'multi-task', 'multi-goal', 'model-based', 'model-free', 
+            'successor', 'markov', 'multi-task', 'multi-goal', 'model-based', 'model-free',  'replay buffer',
             'td-learning', 'temporal difference', 'bandit', 'control', 'temporal-difference', 
             'actor-critic', 'actor critic', 'hierachical', 'hierachical reinforcement learning', 
             'bayes', 'trajectory', 'trajectories', 'imitation learning', 'control',  'planning',
-            'markov decision processes', 'credit assignment', 'markov chain monte carlo']
+            'markov decision processes', 'credit assignment', 'markov chain monte carlo', 'experience replay']
 
     thread_num = parser.thread_num
     threads = []
