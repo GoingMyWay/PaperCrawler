@@ -23,10 +23,11 @@ class PaperCrawler(Spider):
             item['sup'] = _sup_data
             yield item
 
+
 class ICLRCrawler(Spider):
-    name = "ICLRCrawler"
+    name = "ConCrawler"
     allowed_domains = ["iclr.cc"]
-    start_urls = ["https://iclr.cc/Conferences/2019/Schedule?type=Poster", ]
+    start_urls = ["https://iclr.cc/Conferences/2018/Schedule?type=Poster", "https://iclr.cc/Conferences/2018/Schedule?type=Oral"]
 
     def parse(self, response):
 
