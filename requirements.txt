@@ -5,7 +5,7 @@
 # PaperCrawler\items.py: 10
 # PaperCrawler\middlewares.py: 8
 # PaperCrawler\spiders\crawler.py: 1,2
-Scrapy == 1.6.0
+Scrapy == 1.8.1
 
 # PaperCrawler\download_pdf.py: 11
 pdfrw == 0.4
